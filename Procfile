@@ -1,0 +1,1 @@
+worker: java -Dserver.port=$PORT $JAVA_OPTS -jar target/invest-0.0.1-SNAPSHOT.jar
