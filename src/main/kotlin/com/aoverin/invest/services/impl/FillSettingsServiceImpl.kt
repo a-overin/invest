@@ -16,8 +16,8 @@ class FillSettingsServiceImpl(
 ) : FillSettingsService {
 
     override fun getDatesToFill(stock: Stock, filler: FillerType, interval: Period): List<LocalDate> {
-        return if (stock.startFill?.isBefore(LocalDate.now().minusDays(1)) == true) {
-            stock.startFill.datesUntil(LocalDate.now().minusDays(1), interval).toList()
+        return if (stock.startFill?.isBefore(LocalDate.now()) == true) {
+            stock.startFill.datesUntil(LocalDate.now(), interval).toList()
                 .minus(dao.getFilledDates(stock.code, filler.name).toSet())
                 .toList()
         } else {
