@@ -53,17 +53,25 @@ class PolygonApi(
     }
 
     override fun getStockInfoByDateAndCode(code: String, date: LocalDate): StockInfo? {
-        val responseEntity = restTemplate.getForEntity(
-            UriComponentsBuilder.fromUriString(configuration.url + TICKER_DETAIL)
-                .queryParam("apiKey", configuration.apiKey)
-                .queryParam("date",date.format(DateTimeFormatter.ISO_DATE))
-                .buildAndExpand(mapOf("ticker" to code)).toUri(),
-            StockInfoResponse::class.java
-        )
-        return if (responseEntity.statusCode == HttpStatus.OK && responseEntity.body?.status == "OK") {
-            responseEntity.body?.results?.toStockInfo()
-        } else {
-            return null
+        try {
+            val responseEntity = restTemplate.getForEntity(
+                UriComponentsBuilder.fromUriString(configuration.url + TICKER_DETAIL)
+                    .queryParam("apiKey", configuration.apiKey)
+                    .queryParam("date",date.format(DateTimeFormatter.ISO_DATE))
+                    .buildAndExpand(mapOf("ticker" to code)).toUri(),
+                StockInfoResponse::class.java
+            )
+            return if (responseEntity.statusCode == HttpStatus.OK && responseEntity.body?.status == "OK") {
+                responseEntity.body?.results?.toStockInfo()
+            } else {
+                return null
+            }
+        } catch (e: HttpClientErrorException) {
+            if (e.statusCode == HttpStatus.TOO_MANY_REQUESTS) {
+                throw RequestApiBlockingException(e.message, e)
+            } else {
+                throw e
+            }
         }
     }
 

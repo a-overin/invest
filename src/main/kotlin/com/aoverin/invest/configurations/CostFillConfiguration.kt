@@ -8,4 +8,9 @@ import java.time.Period
 @ConfigurationProperties(prefix = "com.aoverin.invest.stock.fill.cost")
 data class CostFillConfiguration(
     val period: Period
-)
+) : FillConfiguration {
+
+    override fun getPeriodForFill(): Period {
+        return period
+    }
+}
