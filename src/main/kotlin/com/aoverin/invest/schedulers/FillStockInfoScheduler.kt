@@ -6,6 +6,8 @@ import com.aoverin.invest.models.FillerType
 import com.aoverin.invest.models.Stock
 import com.aoverin.invest.services.FillSettingsService
 import com.aoverin.invest.services.StockMarketApi
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -19,6 +21,8 @@ class FillStockInfoScheduler(
     settingsService: FillSettingsService,
     fillConfiguration: InfoFillConfiguration
 ) : AbstractFillScheduler(fillConfiguration, settingsService) {
+
+    override val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @Scheduled(fixedDelayString = "\${com.aoverin.invest.stock.fill.info.scheduler.fixed-rate}")
     fun fillInfo() {

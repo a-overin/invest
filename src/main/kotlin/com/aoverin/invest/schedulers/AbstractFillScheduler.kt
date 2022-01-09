@@ -7,13 +7,14 @@ import com.aoverin.invest.models.FillerType
 import com.aoverin.invest.models.Stock
 import com.aoverin.invest.services.FillSettingsService
 import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 abstract class AbstractFillScheduler(
     private val fillConfiguration: FillConfiguration,
     private val settingsService: FillSettingsService,
 ) {
+
+    abstract val logger: Logger
 
     protected fun fillInfoByDates(stock: Stock) {
         logger.info("start fill ${getFillType()} for ${stock.code}")
@@ -43,8 +44,4 @@ abstract class AbstractFillScheduler(
     abstract fun makeWorkForStockByDate(stock: Stock, date: LocalDate)
 
     abstract fun getFillType(): FillerType
-
-    companion object {
-        val logger: Logger = LoggerFactory.getLogger(Companion::class.java.declaringClass)
-    }
 }
