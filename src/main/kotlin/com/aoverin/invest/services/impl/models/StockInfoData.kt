@@ -1,7 +1,6 @@
 package com.aoverin.invest.services.impl.models
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import java.time.LocalDateTime
 
 data class StockInfoData(
     val ticker: String? = null,
@@ -15,7 +14,5 @@ data class StockInfoData(
     @JsonProperty("primary_exchange")
     val primaryExchange: String? = null,
     @JsonProperty("market_cap")
-    val marketCap: Long? = null,
-    @JsonProperty("last_updated_utc")
-    val lastUpdatedUtc: LocalDateTime? = null
+    val marketCap: Long? = null
 )

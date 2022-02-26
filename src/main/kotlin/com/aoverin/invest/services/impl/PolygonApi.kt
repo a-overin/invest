@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.util.UriComponentsBuilder
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Service
@@ -86,7 +87,7 @@ class PolygonApi(
             currencyName = this.currencyName!!,
             primaryExchange = this.primaryExchange!!,
             marketCap = this.marketCap!!,
-            lastUpdatedUtc = this.lastUpdatedUtc!!
+            lastUpdatedUtc = LocalDateTime.now()
         )
     }
 
@@ -106,6 +107,6 @@ class PolygonApi(
     companion object {
         private const val DAILY_OPEN_CLOSE = "/v1/open-close/{stocksTicker}/{date}"
 
-        private const val TICKER_DETAIL = "/vX/reference/tickers/{ticker}"
+        private const val TICKER_DETAIL = "/v3/reference/tickers/{ticker}"
     }
 }
