@@ -2,7 +2,8 @@ package com.aoverin.invest
 
 import com.aoverin.invest.configurations.CostFillConfiguration
 import com.aoverin.invest.configurations.InfoFillConfiguration
-import com.aoverin.invest.configurations.PolygonApiConfiguration
+import com.aoverin.invest.configurations.PolygonApiProperties
+import com.aoverin.invest.configurations.TelegramBotProperties
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
@@ -10,9 +11,10 @@ import org.springframework.scheduling.annotation.EnableScheduling
 
 @EnableScheduling
 @EnableConfigurationProperties(
-	PolygonApiConfiguration::class,
+	PolygonApiProperties::class,
 	InfoFillConfiguration::class,
-	CostFillConfiguration::class
+	CostFillConfiguration::class,
+	TelegramBotProperties::class,
 )
 @SpringBootApplication
 class InvestApplication

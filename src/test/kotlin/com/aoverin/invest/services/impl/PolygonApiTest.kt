@@ -4,7 +4,6 @@ import com.aoverin.invest.configurations.InfoFillConfiguration
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import java.time.LocalDate
 
 @SpringBootTest
 internal class PolygonApiTest {
@@ -23,6 +22,7 @@ internal class PolygonApiTest {
 //        println(conf.period.days)
 //        println(LocalDate.of(2021, 12, 1).rangeTo(LocalDate.now()))
 //        println(LocalDate.of(2021, 12, 1).datesUntil(LocalDate.now(), conf.period).toList())
-        println(polygonApi.getStockInfoByDateAndCode("ATVI", LocalDate.of(2022, 2, 1)))
+//        println(polygonApi.getStockInfoByDateAndCode("ATVI", LocalDate.of(2022, 2, 1)))
+//        println(polygonApi.getStockCostByDateAndCode("QIWI", LocalDate.of(2022, 2, 25)))
     }
 }

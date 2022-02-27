@@ -5,6 +5,7 @@ import com.aoverin.invest.exceptions.RequestApiBlockingException
 import com.aoverin.invest.models.FillResult
 import com.aoverin.invest.models.FillerType
 import com.aoverin.invest.models.Stock
+import com.aoverin.invest.services.AnnounceService
 import com.aoverin.invest.services.FillSettingsService
 import org.slf4j.Logger
 import java.time.LocalDate
@@ -12,6 +13,7 @@ import java.time.LocalDate
 abstract class AbstractFillScheduler(
     private val fillConfiguration: FillConfiguration,
     private val settingsService: FillSettingsService,
+    private val announceService: AnnounceService
 ) {
 
     abstract val logger: Logger
@@ -29,13 +31,19 @@ abstract class AbstractFillScheduler(
         runCatching {
             makeWorkForStockByDate(stock, date)
         }
-            .onSuccess { settingsService.saveResultToLog(stock, getFillType(), date, FillResult.SUCCESS) }
+            .onSuccess {
+                announceService.sendAnnounce("success update ${getFillType()} for ${stock.code} and $date")
+                settingsService.saveResultToLog(stock, getFillType(), date, FillResult.SUCCESS)
+            }
             .onFailure {
                 if (it is RequestApiBlockingException) {
                     logger.info("maximum api request error on ${stock.code} and $date")
                     throw it
                 }
-                logger.error("error while fill ${getFillType()} for ${stock.code} and $date with message: ${it.message}")
+                val errorMessage =
+                    "error while fill ${getFillType()} for ${stock.code} and $date with message: ${it.message}"
+                announceService.sendAnnounce(errorMessage)
+                logger.error(errorMessage)
                 settingsService.saveResultToLog(stock, getFillType(), date, FillResult.FAILED)
             }
         logger.info("finished fill ${getFillType()} for ${stock.code} and date: $date")

@@ -1,6 +1,6 @@
 package com.aoverin.invest.services.impl
 
-import com.aoverin.invest.configurations.PolygonApiConfiguration
+import com.aoverin.invest.configurations.PolygonApiProperties
 import com.aoverin.invest.exceptions.RequestApiBlockingException
 import com.aoverin.invest.models.StockCost
 import com.aoverin.invest.models.StockInfo
@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter
 @Service
 class PolygonApi(
     restTemplateBuilder: RestTemplateBuilder,
-    private val configuration: PolygonApiConfiguration
+    private val configuration: PolygonApiProperties
 ) : StockMarketApi {
 
     private val restTemplate = restTemplateBuilder.build()

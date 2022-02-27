@@ -4,6 +4,7 @@ import com.aoverin.invest.configurations.CostFillConfiguration
 import com.aoverin.invest.dao.StockDao
 import com.aoverin.invest.models.FillerType
 import com.aoverin.invest.models.Stock
+import com.aoverin.invest.services.AnnounceService
 import com.aoverin.invest.services.FillSettingsService
 import com.aoverin.invest.services.StockMarketApi
 import org.slf4j.Logger
@@ -19,8 +20,9 @@ class FillStockCostScheduler(
     private val stockMarketApi: StockMarketApi,
     private val stockDao: StockDao,
     settingsService: FillSettingsService,
-    fillConfiguration: CostFillConfiguration
-) : AbstractFillScheduler(fillConfiguration, settingsService) {
+    fillConfiguration: CostFillConfiguration,
+    announceService: AnnounceService
+) : AbstractFillScheduler(fillConfiguration, settingsService, announceService) {
 
     override val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
