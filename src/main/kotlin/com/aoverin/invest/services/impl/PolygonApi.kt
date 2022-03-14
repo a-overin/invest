@@ -10,9 +10,11 @@ import com.aoverin.invest.services.impl.models.StockInfoData
 import com.aoverin.invest.services.impl.models.StockInfoResponse
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.util.UriComponentsBuilder
+import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -26,47 +28,43 @@ class PolygonApi(
     private val restTemplate = restTemplateBuilder.build()
 
     override fun getStockCostByDateAndCode(code: String, date: LocalDate): StockCost? {
-        try {
-            val responseEntity = restTemplate.getForEntity(
-                UriComponentsBuilder.fromUriString(configuration.url + DAILY_OPEN_CLOSE)
-                    .queryParam("apiKey", configuration.apiKey)
-                    .buildAndExpand(
-                        mapOf(
-                            "stocksTicker" to code,
-                            "date" to date.format(DateTimeFormatter.ISO_DATE)
-                        )
+        val responseEntity = executeRequest(
+            UriComponentsBuilder.fromUriString(configuration.url + DAILY_OPEN_CLOSE)
+                .queryParam("apiKey", configuration.apiKey)
+                .buildAndExpand(
+                    mapOf(
+                        "stocksTicker" to code,
+                        "date" to date.format(DateTimeFormatter.ISO_DATE)
                     )
-                    .toUri(),
-                StockCostResponse::class.java,
-            )
-            return if (responseEntity.statusCode == HttpStatus.OK && responseEntity.body?.status == "OK") {
-                responseEntity.body?.toStockCost()
-            } else {
-                null
-            }
-        } catch (e: HttpClientErrorException) {
-            if (e.statusCode == HttpStatus.TOO_MANY_REQUESTS) {
-                throw RequestApiBlockingException(e.message, e)
-            } else {
-                throw e
-            }
+                )
+                .toUri(),
+            StockCostResponse::class.java,
+        )
+        return if (responseEntity.statusCode == HttpStatus.OK && responseEntity.body?.status == "OK") {
+            responseEntity.body?.toStockCost()
+        } else {
+            null
         }
     }
 
     override fun getStockInfoByDateAndCode(code: String, date: LocalDate): StockInfo? {
+        val responseEntity = executeRequest(
+            UriComponentsBuilder.fromUriString(configuration.url + TICKER_DETAIL)
+                .queryParam("apiKey", configuration.apiKey)
+                .queryParam("date", date.format(DateTimeFormatter.ISO_DATE))
+                .buildAndExpand(mapOf("ticker" to code)).toUri(),
+            StockInfoResponse::class.java
+        )
+        return if (responseEntity.statusCode == HttpStatus.OK && responseEntity.body?.status == "OK") {
+            responseEntity.body?.results?.toStockInfo()
+        } else {
+            return null
+        }
+    }
+
+    private fun <T> executeRequest(uri: URI, clazz: Class<T>): ResponseEntity<T> {
         try {
-            val responseEntity = restTemplate.getForEntity(
-                UriComponentsBuilder.fromUriString(configuration.url + TICKER_DETAIL)
-                    .queryParam("apiKey", configuration.apiKey)
-                    .queryParam("date",date.format(DateTimeFormatter.ISO_DATE))
-                    .buildAndExpand(mapOf("ticker" to code)).toUri(),
-                StockInfoResponse::class.java
-            )
-            return if (responseEntity.statusCode == HttpStatus.OK && responseEntity.body?.status == "OK") {
-                responseEntity.body?.results?.toStockInfo()
-            } else {
-                return null
-            }
+            return restTemplate.getForEntity(uri, clazz)
         } catch (e: HttpClientErrorException) {
             if (e.statusCode in ignoredErrorCodesList) {
                 throw RequestApiBlockingException(e.message, e)
