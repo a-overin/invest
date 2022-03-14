@@ -32,8 +32,8 @@ abstract class AbstractFillScheduler(
             makeWorkForStockByDate(stock, date)
         }
             .onSuccess {
-                announceService.sendAnnounce("success update ${getFillType()} for ${stock.code} and $date")
                 settingsService.saveResultToLog(stock, getFillType(), date, FillResult.SUCCESS)
+                announceService.sendAnnounce("success update ${getFillType()} for ${stock.code} and $date")
             }
             .onFailure {
                 if (it is RequestApiBlockingException) {
@@ -42,8 +42,8 @@ abstract class AbstractFillScheduler(
                 }
                 val errorMessage =
                     "error while fill ${getFillType()} for ${stock.code} and $date with message: ${it.message}"
-                announceService.sendAnnounce(errorMessage)
                 logger.error(errorMessage)
+                announceService.sendAnnounce(errorMessage)
                 settingsService.saveResultToLog(stock, getFillType(), date, FillResult.FAILED)
             }
         logger.info("finished fill ${getFillType()} for ${stock.code} and date: $date")

@@ -7,6 +7,7 @@ import com.aoverin.invest.models.Stock
 import com.aoverin.invest.services.FillSettingsService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Period
 import kotlin.streams.toList
 
@@ -17,9 +18,8 @@ class FillSettingsServiceImpl(
 
     override fun getDatesToFill(stock: Stock, filler: FillerType, interval: Period): List<LocalDate> {
         return if (stock.startFill?.isBefore(LocalDate.now()) == true) {
-            stock.startFill.datesUntil(LocalDate.now(), interval).toList()
-                .minus(dao.getFilledDates(stock.code, filler.name).toSet())
-                .toList()
+            stock.startFill.datesUntil(LocalDateTime.now().minusHours(3).toLocalDate(), interval).toList()
+                .filterNot { it in dao.getFilledDates(stock.code, filler.name).toSet() }
         } else {
             emptyList()
         }
