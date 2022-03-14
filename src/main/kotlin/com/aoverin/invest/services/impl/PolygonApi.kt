@@ -2,6 +2,7 @@ package com.aoverin.invest.services.impl
 
 import com.aoverin.invest.configurations.PolygonApiProperties
 import com.aoverin.invest.exceptions.RequestApiBlockingException
+import com.aoverin.invest.exceptions.RequestApiNotFoundException
 import com.aoverin.invest.models.StockCost
 import com.aoverin.invest.models.StockInfo
 import com.aoverin.invest.services.StockMarketApi
@@ -12,9 +13,9 @@ import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.util.UriComponentsBuilder
-import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -29,15 +30,12 @@ class PolygonApi(
 
     override fun getStockCostByDateAndCode(code: String, date: LocalDate): StockCost? {
         val responseEntity = executeRequest(
-            UriComponentsBuilder.fromUriString(configuration.url + DAILY_OPEN_CLOSE)
-                .queryParam("apiKey", configuration.apiKey)
-                .buildAndExpand(
-                    mapOf(
-                        "stocksTicker" to code,
-                        "date" to date.format(DateTimeFormatter.ISO_DATE)
-                    )
-                )
-                .toUri(),
+            configuration.url + DAILY_OPEN_CLOSE,
+            mutableMapOf(),
+            mapOf(
+                "stocksTicker" to code,
+                "date" to date.format(DateTimeFormatter.ISO_DATE)
+            ),
             StockCostResponse::class.java,
         )
         return if (responseEntity.statusCode == HttpStatus.OK && responseEntity.body?.status == "OK") {
@@ -49,10 +47,9 @@ class PolygonApi(
 
     override fun getStockInfoByDateAndCode(code: String, date: LocalDate): StockInfo? {
         val responseEntity = executeRequest(
-            UriComponentsBuilder.fromUriString(configuration.url + TICKER_DETAIL)
-                .queryParam("apiKey", configuration.apiKey)
-                .queryParam("date", date.format(DateTimeFormatter.ISO_DATE))
-                .buildAndExpand(mapOf("ticker" to code)).toUri(),
+            configuration.url + TICKER_DETAIL,
+            mutableMapOf("date" to mutableListOf(date.format(DateTimeFormatter.ISO_DATE))),
+            mapOf("ticker" to code),
             StockInfoResponse::class.java
         )
         return if (responseEntity.statusCode == HttpStatus.OK && responseEntity.body?.status == "OK") {
@@ -62,14 +59,33 @@ class PolygonApi(
         }
     }
 
-    private fun <T> executeRequest(uri: URI, clazz: Class<T>): ResponseEntity<T> {
+    private fun <T> executeRequest(
+        url: String,
+        queryParams: MutableMap<String, MutableList<String>>,
+        expandParams: Map<String, Any>,
+        clazz: Class<T>
+    ): ResponseEntity<T> {
         try {
-            return restTemplate.getForEntity(uri, clazz)
+            return restTemplate.getForEntity(
+                UriComponentsBuilder
+                    .fromUriString(url)
+                    .queryParams(LinkedMultiValueMap(queryParams))
+                    .queryParam("apiKey", configuration.apiKey)
+                    .buildAndExpand(expandParams)
+                    .toUri(),
+                clazz
+            )
         } catch (e: HttpClientErrorException) {
-            if (e.statusCode in ignoredErrorCodesList) {
-                throw RequestApiBlockingException(e.message, e)
-            } else {
-                throw e
+            when (e.statusCode) {
+                in ignoredErrorCodesList -> throw RequestApiBlockingException(
+                    "error while send request to $url with $queryParams and $expandParams for ${clazz.simpleName}: ${e.message}",
+                    e
+                )
+                HttpStatus.NOT_FOUND -> throw RequestApiNotFoundException(
+                    "not found data to $url with $queryParams and $expandParams for ${clazz.simpleName}: ${e.message}",
+                    e
+                )
+                else -> throw e
             }
         }
     }

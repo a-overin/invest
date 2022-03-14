@@ -2,6 +2,7 @@ package com.aoverin.invest.schedulers
 
 import com.aoverin.invest.configurations.FillConfiguration
 import com.aoverin.invest.exceptions.RequestApiBlockingException
+import com.aoverin.invest.exceptions.RequestApiNotFoundException
 import com.aoverin.invest.models.FillResult
 import com.aoverin.invest.models.FillerType
 import com.aoverin.invest.models.Stock
@@ -43,7 +44,9 @@ abstract class AbstractFillScheduler(
                 val errorMessage =
                     "error while fill ${getFillType()} for ${stock.code} and $date with message: ${it.message}"
                 logger.error(errorMessage)
-                announceService.sendAnnounce(errorMessage)
+                if (it !is RequestApiNotFoundException) {
+                    announceService.sendAnnounce(errorMessage)
+                }
                 settingsService.saveResultToLog(stock, getFillType(), date, FillResult.FAILED)
             }
         logger.info("finished fill ${getFillType()} for ${stock.code} and date: $date")

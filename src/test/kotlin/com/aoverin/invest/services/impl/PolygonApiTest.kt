@@ -16,8 +16,8 @@ internal class PolygonApiTest {
 
     @Test
     fun getStockInfoByDateAndCode() {
-//        println(polygonApi.getStockInfoByDateAndCode("QIWI", LocalDate.of(2022, 1, 4)))
-//        println(polygonApi.getStockCostByDateAndCode("QIWI", LocalDate.of(2022, 1, 4)))
+//        println(polygonApi.getStockInfoByDateAndCode("QIWI", LocalDate.of(2022, 3, 13)))
+//        println(polygonApi.getStockCostByDateAndCode("QIWI", LocalDate.of(2022, 3, 13)))
 //        println(conf.period.months)
 //        println(conf.period.days)
 //        println(LocalDate.of(2021, 12, 1).rangeTo(LocalDate.now()))
