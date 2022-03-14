@@ -68,7 +68,7 @@ class PolygonApi(
                 return null
             }
         } catch (e: HttpClientErrorException) {
-            if (e.statusCode == HttpStatus.TOO_MANY_REQUESTS) {
+            if (e.statusCode in ignoredErrorCodesList) {
                 throw RequestApiBlockingException(e.message, e)
             } else {
                 throw e
@@ -105,6 +105,12 @@ class PolygonApi(
     }
 
     companion object {
+
+        private val ignoredErrorCodesList = listOf(
+            HttpStatus.TOO_MANY_REQUESTS,
+            HttpStatus.BAD_REQUEST
+        )
+
         private const val DAILY_OPEN_CLOSE = "/v1/open-close/{stocksTicker}/{date}"
 
         private const val TICKER_DETAIL = "/v3/reference/tickers/{ticker}"
